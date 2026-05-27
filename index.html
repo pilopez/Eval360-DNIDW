@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación 360° · DNIDW</title>
+<style>
+  :root {
+    --indra: #003DA5;
+    --indra-light: #E8EEFB;
+    --indra-dark: #002d7a;
+    --text: #1E293B;
+    --muted: #64748B;
+    --faint: #94A3B8;
+    --border: #E2E8F0;
+    --bg: #F0F2F5;
+    --surface: #FFFFFF;
+    --green: #16A34A;
+    --green-bg: #DCFCE7;
+    --yellow: #D97706;
+    --yellow-bg: #FEF3C7;
+    --red: #DC2626;
+    --red-bg: #FEE2E2;
+    --purple: #7C3AED;
+    --purple-bg: #EDE9FE;
+    --blue: #0369A1;
+    --blue-bg: #E0F2FE;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* TOPBAR */
+  .topbar { background: var(--indra); color: #fff; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+  .topbar-title { font-weight: 800; font-size: 15px; }
+  .topbar-sub { font-size: 12px; opacity: 0.75; margin-left: 12px; }
+  .topbar-right { display: flex; gap: 10px; align-items: center; }
+  .badge { padding: 3px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+  .badge-admin { background: rgba(124,58,237,0.3); color: #c4b5fd; }
+  .badge-eval { background: rgba(22,163,74,0.3); color: #86efac; }
+  .btn-exit { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 6px; padding: 4px 12px; cursor: pointer; font-size: 12px; font-family: inherit; }
+
+  /* LAYOUT */
+  .container { max-width: 680px; margin: 0 auto; padding: 24px 16px 60px; }
+  .container-wide { max-width: 860px; margin: 0 auto; padding: 24px 16px 60px; }
+
+  /* CARDS */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); margin-bottom: 12px; }
+  .card-blue { background: var(--indra-light); border-color: rgba(0,61,165,0.2); }
+  .card-warn { background: #FFFBEB; border-color: #FDE68A; }
+
+  /* TYPOGRAPHY */
+  .page-title { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .section-label { font-size: 11px; font-weight: 700; color: var(--faint); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+
+  /* BUTTONS */
+  .btn { border: none; border-radius: 10px; padding: 11px 22px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.15s, transform 0.1s; font-family: inherit; display: inline-flex; align-items: center; gap: 6px; }
+  .btn:hover { opacity: 0.88; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-primary { background: var(--indra); color: #fff; }
+  .btn-secondary { background: #F1F5F9; color: var(--text); }
+  .btn-success { background: var(--green-bg); color: var(--green); }
+  .btn-danger { background: var(--red-bg); color: var(--red); }
+  .btn-full { width: 100%; justify-content: center; }
+  .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 8px; }
+
+  /* LOGIN */
+  .login-wrap { max-width: 400px; margin: 80px auto; padding: 32px; text-align: center; }
+  .login-badge { display: inline-block; background: var(--indra); color: #fff; border-radius: 12px; padding: 8px 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 24px; }
+  .login-title { font-size: 28px; font-weight: 900; color: var(--text); margin-bottom: 6px; }
+  .login-desc { font-size: 14px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
+  .login-btns { display: flex; flex-direction: column; gap: 10px; }
+
+  /* SCORE BUTTONS */
+  .score-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .score-btn { width: 44px; height: 44px; border-radius: 10px; border: 2px solid var(--border); background: #F8FAFC; color: var(--muted); font-weight: 800; font-size: 16px; cursor: pointer; transition: all 0.15s; font-family: inherit; }
+  .score-btn:hover { border-color: var(--indra); color: var(--indra); transform: scale(1.05); }
+  .score-btn.active-1 { background: var(--red-bg); border-color: var(--red); color: var(--red); transform: scale(1.1); }
+  .score-btn.active-2 { background: var(--yellow-bg); border-color: var(--yellow); color: var(--yellow); transform: scale(1.1); }
+  .score-btn.active-3 { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); transform: scale(1.1); }
+  .score-btn.active-4 { background: var(--green-bg); border-color: var(--green); color: var(--green); transform: scale(1.1); }
+  .score-btn.active-5 { background: var(--purple-bg); border-color: var(--purple); color: var(--purple); transform: scale(1.1); }
+  .score-label { font-size: 11px; font-weight: 600; margin-left: 6px; align-self: center; }
+
+  /* SUGGESTIONS */
+  .suggestions { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+  .suggestion-btn { text-align: left; padding: 6px 10px; border-radius: 8px; font-size: 12px; border: 1px solid var(--border); background: #F8FAFC; color: var(--muted); cursor: pointer; transition: all 0.12s; font-family: inherit; }
+  .suggestion-btn:hover { border-color: var(--indra); color: var(--indra); background: var(--indra-light); }
+  .suggestion-btn.selected { border-width: 2px; }
+
+  /* DRIVER CARD */
+  .driver-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; }
+  .driver-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .driver-name { font-weight: 700; font-size: 14px; color: var(--text); display: flex; gap: 8px; align-items: center; }
+  .driver-weight { font-size: 11px; color: var(--faint); }
+  .driver-criteria { background: #F8FAFC; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; }
+  .driver-criteria li { font-size: 12px; color: var(--muted); margin-bottom: 3px; list-style: none; }
+  .driver-criteria li::before { content: "· "; }
+  .score-badge { padding: 3px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .score-note { font-size: 11px; font-weight: 600; margin-bottom: 8px; }
+  .score-note.required { color: var(--red); }
+  textarea { width: 100%; font-size: 12px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; resize: vertical; font-family: inherit; color: var(--text); outline: none; transition: border-color 0.15s; }
+  textarea:focus { border-color: var(--indra); }
+  textarea.required-border { border-color: var(--red); }
+
+  /* PROGRESS BAR */
+  .progress-bar { height: 6px; background: #F1F5F9; border-radius: 4px; overflow: hidden; margin-top: 8px; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+  /* GALLERY */
+  .eval-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface); cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; margin-bottom: 8px; }
+  .eval-item:hover { box-shadow: 0 4px 12px rgba(0,61,165,0.1); border-color: var(--indra); }
+  .eval-item.done { opacity: 0.6; cursor: default; background: #F8FAFC; }
+  .eval-item.done:hover { box-shadow: none; border-color: var(--border); }
+  .eval-item-name { font-weight: 700; font-size: 14px; color: var(--text); }
+  .eval-item-sub { font-size: 12px; color: var(--faint); margin-top: 2px; }
+  .pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+  .pill-done { background: var(--green-bg); color: var(--green); }
+  .pill-pending { background: var(--indra-light); color: var(--indra); }
+
+  /* ADMIN DASHBOARD */
+  .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+  .stat-number { font-size: 28px; font-weight: 900; color: var(--indra); }
+  .stat-label { font-size: 12px; color: var(--faint); margin-top: 4px; }
+  .subject-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; cursor: pointer; transition: box-shadow 0.15s; margin-bottom: 10px; }
+  .subject-card:hover { box-shadow: 0 4px 12px rgba(0,61,165,0.1); }
+  .subject-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .subject-score { font-size: 22px; font-weight: 900; }
+  .driver-mini { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+  .driver-mini-pill { font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 700; }
+
+  /* REPORT */
+  .radar-container { display: flex; justify-content: center; margin: 16px 0; }
+  .driver-report-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .driver-report-icon { font-size: 18px; width: 24px; }
+  .driver-report-name { flex: 1; font-size: 13px; font-weight: 600; color: var(--text); }
+  .driver-report-weight { font-size: 11px; color: var(--faint); }
+  .driver-bar-wrap { width: 160px; }
+  .driver-score-val { width: 36px; text-align: center; font-weight: 800; font-size: 15px; }
+  .comment-block { margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .comment-block-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+  .comment-trend { font-size: 12px; color: var(--muted); background: #F8FAFC; padding: 6px 10px; border-radius: 6px; margin-bottom: 4px; }
+  .comment-free { font-size: 12px; color: var(--muted); padding: 4px 10px; border-left: 3px solid var(--border); margin-top: 4px; }
+  .admin-only { background: #1E293B; border-radius: 10px; padding: 16px; margin-top: 16px; }
+  .admin-only-title { font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+  .response-row { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 12px; margin-bottom: 8px; }
+  .response-evaluator { font-weight: 600; color: #E2E8F0; font-size: 13px; margin-bottom: 8px; }
+  .response-date { color: #64748B; font-size: 11px; font-weight: 400; margin-left: 8px; }
+  .response-driver { font-size: 12px; color: #94A3B8; margin-bottom: 3px; }
+
+  /* TABS */
+  .tabs { display: flex; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; position: sticky; top: 49px; z-index: 50; }
+  .tab-btn { background: none; border: none; padding: 14px 16px; font-size: 13px; font-weight: 500; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; font-family: inherit; transition: color 0.15s; }
+  .tab-btn.active { color: var(--indra); font-weight: 700; border-bottom-color: var(--indra); }
+
+  /* FORM ELEMENTS */
+  select, input[type="text"] { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; color: var(--text); font-family: inherit; background: #fff; outline: none; }
+  select:focus, input[type="text"]:focus { border-color: var(--indra); }
+  .form-group { margin-bottom: 12px; }
+  .form-label { font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 4px; display: block; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+
+  /* LOADING / STATES */
+  .loading { text-align: center; padding: 40px; color: var(--faint); font-size: 14px; }
+  .empty { text-align: center; padding: 40px; color: var(--faint); font-size: 14px; }
+  .done-wrap { max-width: 480px; margin: 80px auto; text-align: center; padding: 24px; }
+  .done-icon { font-size: 56px; margin-bottom: 16px; }
+
+  /* ALERT */
+  .alert { padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-bottom: 12px; }
+  .alert-info { background: var(--indra-light); color: var(--indra); }
+  .alert-warn { background: var(--yellow-bg); color: var(--yellow); font-weight: 600; }
+  .alert-error { background: var(--red-bg); color: var(--red); }
+
+  /* STRENGTHS/AREAS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+  .strength-item { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 6px; font-size: 13px; }
+  .strength-plus { color: var(--green); font-weight: 700; }
+  .area-arrow { color: var(--yellow); font-weight: 700; }
+
+  @media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2,1fr); }
+    .two-col { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .driver-bar-wrap { width: 100px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CONFIGURATION
+// ═══════════════════════════════════════════════════════
+const CONFIG = {
+  siteUrl: "https://indra365.sharepoint.com/sites/Grp_T_DNID",
+  adminEmail: "pilopez@minsait.com",
+  periodo: "S2-2025",
+  lists: { equipo: "Equipo", evaluadores: "Evaluadores", respuestas: "Respuestas" }
+};
+
+// ═══════════════════════════════════════════════════════
+// DRIVER DATA
+// ═══════════════════════════════════════════════════════
+const SCORE_META = {
+  1: { label: "No cumple expectativas", color: "var(--red)", bg: "var(--red-bg)", short: "NCE" },
+  2: { label: "Con ámbitos de mejora", color: "var(--yellow)", bg: "var(--yellow-bg)", short: "CAM" },
+  3: { label: "Buena ejecución", color: "var(--blue)", bg: "var(--blue-bg)", short: "BE" },
+  4: { label: "Muy buena ejecución", color: "var(--green)", bg: "var(--green-bg)", short: "MBE" },
+  5: { label: "Ejecución excepcional", color: "var(--purple)", bg: "var(--purple-bg)", short: "EE" }
+};
+
+const DRIVER_ICONS = {
+  capacidad_analitica: "🧠", excelencia_entrega: "🎯",
+  trabajo_equipo: "🤝", gestion: "⚙️",
+  interlocucion: "💬", conocimiento_tecnico: "📚"
+};
+
+const DRIVER_NAMES = {
+  capacidad_analitica: "Capacidad Analítica",
+  excelencia_entrega: "Excelencia en Entrega",
+  trabajo_equipo: "Trabajo en Equipo",
+  gestion: "Gestión",
+  interlocucion: "Interlocución y Comunicación",
+  conocimiento_tecnico: "Conocimiento Técnico"
+};
+
+const DRIVER_ORDER = ["capacidad_analitica","excelencia_entrega","trabajo_equipo","gestion","interlocucion","conocimiento_tecnico"];
+
+const DRIVERS_CONFIG = {
+  "Analyst": {
+    weights: {capacidad_analitica:0.20,excelencia_entrega:0.25,trabajo_equipo:0.25,gestion:0.10,interlocucion:0.10,conocimiento_tecnico:0.10},
+    criteria: {
+      capacidad_analitica:["Comprende y aplica los inputs del modelo de costes bajo supervisión","Identifica errores básicos en datos y fórmulas con ayuda"],
+      excelencia_entrega:["Entrega en plazo con la calidad exigida para su nivel","Documenta el trabajo de forma clara y ordenada"],
+      trabajo_equipo:["Contribuye activamente al equipo y muestra buena disposición","Encaje, colaboración y actitud positiva en el día a día"],
+      gestion:["Se autogestiona en tareas definidas sin seguimiento constante","Comunica avances y bloqueos a tiempo"],
+      interlocucion:["Comunica con claridad dentro del equipo","Sus documentos y presentaciones son comprensibles"],
+      conocimiento_tecnico:["Muestra interés en conocer el sector y el portfolio de servicios","Participa en formación y busca actualizarse"]
+    },
+    suggestions: {
+      capacidad_analitica:{low:["Necesita supervisión constante en el análisis","Comete errores frecuentes que requieren corrección"],mid:["Comprensión básica pero requiere apoyo habitual","Mejora progresiva en el manejo de modelos"],high:["Interpreta correctamente los inputs del modelo","Detecta inconsistencias con buena frecuencia","Demuestra madurez analítica adelantada"]},
+      excelencia_entrega:{low:["Frecuentes retrasos o gaps en entregables","La calidad documental requiere mejora importante"],mid:["Cumple plazos con apoyo puntual","Entregables correctos aunque mejorables en forma"],high:["Entrega puntual y con calidad consistente","Sus documentos son claros y bien estructurados","Referente en orden y presentación para su nivel"]},
+      trabajo_equipo:{low:["Actitud poco colaborativa con el equipo","Tendencia al trabajo en silo"],mid:["Colabora cuando se le solicita","Buena disposición aunque poco proactivo"],high:["Generador natural de buen clima en el equipo","Apoya a compañeros sin que se lo pidan","Actitud ejemplar de integración y colaboración"]},
+      gestion:{low:["Requiere seguimiento constante para avanzar","No comunica bloqueos proactivamente"],mid:["Se gestiona en tareas simples con apoyo","Comunicación de avances en desarrollo"],high:["Autogestión notable para su nivel","Anticipa necesidades y comunica con claridad"]},
+      interlocucion:{low:["Comunicación poco clara o imprecisa","Sus documentos son difíciles de seguir"],mid:["Comunicación correcta en entornos conocidos","Mejora progresiva en presentaciones"],high:["Comunica con claridad y profesionalismo","Sus presentaciones transmiten fiabilidad y orden"]},
+      conocimiento_tecnico:{low:["Conocimiento técnico muy limitado para su tiempo en la empresa","Poco interés demostrado en formación"],mid:["Conocimiento en desarrollo","Participa en formación con apoyo externo"],high:["Buen nivel técnico para su grado","Proactivo en formación y actualización continua"]}
+    }
+  },
+  "Consultant": {
+    weights: {capacidad_analitica:0.25,excelencia_entrega:0.25,trabajo_equipo:0.15,gestion:0.10,interlocucion:0.10,conocimiento_tecnico:0.15},
+    criteria: {
+      capacidad_analitica:["Construye modelos de costes de forma autónoma en casos estándar","Interpreta correctamente variables clave e identifica inconsistencias"],
+      excelencia_entrega:["Elabora documentos completos y estructurados con autonomía","Sus entregables requieren mínima revisión en contextos conocidos"],
+      trabajo_equipo:["Apoya activamente a analistas y compañeros sin que se lo pidan","Antepone el éxito del proyecto a su área de responsabilidad"],
+      gestion:["Coordina tareas del equipo con autonomía en contextos simples","Prioriza correctamente bajo presión con apoyo puntual"],
+      interlocucion:["Reconocido como focal point por los mercados en las ofertas que gestiona","Sus comunicaciones transmiten confianza y profesionalismo"],
+      conocimiento_tecnico:["Conocimiento funcional del portfolio DIC/DICW en desarrollo","Discurso técnico coherente en sesiones con expertos con apoyo"]
+    },
+    suggestions: {
+      capacidad_analitica:{low:["Dificultades en construcción autónoma de modelos","Requiere validación constante en casos estándar"],mid:["Construye modelos estándar con apoyo puntual","Interpreta bien los datos pero con limitaciones"],high:["Autónomo en modelos estándar sin necesidad de validación","Detecta inconsistencias y propone soluciones","Excelente manejo de variables complejas para su nivel"]},
+      excelencia_entrega:{low:["Entregables con gaps frecuentes de estructura o contenido","La redacción y organización requieren mejora importante"],mid:["Entregables correctos en casos conocidos","Mejora la calidad con supervisión activa"],high:["Documentos sólidos, bien argumentados y coherentes","Referente documental en el equipo","Produce materiales que requieren mínima revisión"]},
+      trabajo_equipo:{low:["Trabajo en silo frecuente","Poca colaboración con perfiles junior del equipo"],mid:["Colabora cuando se le solicita","Buena actitud aunque reactiva ante necesidades del equipo"],high:["Referente de colaboración en el equipo","Apoya activamente a analistas de forma proactiva","Genera confianza y clima positivo en su entorno"]},
+      gestion:{low:["Dificultades en coordinación y priorización básica","Requiere dirección constante para avanzar"],mid:["Coordina en contextos simples con apoyo","Priorización mejorable en situaciones complejas"],high:["Gestiona equipos pequeños con autonomía real","Excelente priorización incluso bajo presión de plazos"]},
+      interlocucion:{low:["Poca presencia en sesiones con mercado interno/externo","Comunicación mejorable con stakeholders clave"],mid:["Interlocución correcta en contextos conocidos","Mejora progresiva en visibilidad ante mercados"],high:["Reconocido como referente por los mercados","Sus presentaciones generan confianza y credibilidad consistente"]},
+      conocimiento_tecnico:{low:["Conocimiento técnico insuficiente para su nivel","Dificultades frecuentes en sesiones técnicas"],mid:["Conocimiento en desarrollo progresivo","Se defiende con apoyo en sesiones técnicas"],high:["Buen conocimiento del portfolio DIC/DICW","Discurso técnico sólido y actualizado para su rol"]}
+    }
+  },
+  "Senior Consultant": {
+    weights: {capacidad_analitica:0.30,excelencia_entrega:0.25,trabajo_equipo:0.10,gestion:0.05,interlocucion:0.15,conocimiento_tecnico:0.15},
+    criteria: {
+      capacidad_analitica:["Lidera con autonomía modelos complejos (Ops. Estratégicas/Singulares)","Sintetiza outputs con visión de negocio: sostenibilidad financiera y EBIT"],
+      excelencia_entrega:["Elabora documentos complejos (hojas en blanco) con total autonomía","Referente del equipo en estructuración, redacción y calidad documental"],
+      trabajo_equipo:["Orienta y desarrolla capacidades de analistas y consultores activamente","Pilar cultural del equipo: genera confianza y transfiere conocimiento"],
+      gestion:["Gestiona equipos pequeños con autonomía total y prioriza con firmeza","Anticipa necesidades del equipo y comunica sin dirección externa"],
+      interlocucion:["Referente para mercados internos y externos en su ámbito","Sus comunicaciones y presentaciones son vendedoras y generan impacto"],
+      conocimiento_tecnico:["Conocimiento experto de servicios DIC/DICW y su posicionamiento","Conoce el portfolio más allá de su área y las prioridades estratégicas"]
+    },
+    suggestions: {
+      capacidad_analitica:{low:["No lidera modelos complejos con autonomía real","Falta visión de negocio en la síntesis de outputs"],mid:["Lidera modelos estándar, requiere apoyo en los más complejos","Visión de negocio presente pero en desarrollo"],high:["Referente analítico indiscutible del equipo","Visión financiera sólida y aplicada de forma consistente","Autónomo en cualquier tipo de modelo sin excepción"]},
+      excelencia_entrega:{low:["Dificultades en documentos no estructurados o de alta complejidad","Requiere supervisión frecuente incluso en casos conocidos"],mid:["Buenos entregables en casos conocidos","Mejora necesaria en enfoques no estructurados"],high:["Referente absoluto en calidad documental del equipo","Produce materiales impecables sin ninguna supervisión","Eleva el nivel de los entregables del equipo de forma visible"]},
+      trabajo_equipo:{low:["Poco implicado en el desarrollo del equipo junior","Trabajo en silo frecuente a pesar de su seniority"],mid:["Apoya al equipo cuando se le solicita","Buen compañero pero poco proactivo en el desarrollo de otros"],high:["Pilar de desarrollo del equipo junior","Transfiere conocimiento de forma activa y estructurada","Referente cultural y técnico reconocido por todos"]},
+      gestion:{low:["Gestión de equipo mejorable para su nivel","Dificultades en priorización bajo presión"],mid:["Gestión correcta en contextos estándar","Firmeza en decisiones aún en desarrollo"],high:["Gestión autónoma y eficaz de equipos sin necesidad de soporte","Priorización excelente incluso en situaciones de alta presión"]},
+      interlocucion:{low:["Poca presencia ante mercados internos y externos","Comunicación no vendedora ni orientada a generar impacto"],mid:["Reconocido en su ámbito inmediato de trabajo","Comunicación en desarrollo hacia interlocutores externos"],high:["Referente visible y reconocido para mercados","Presentaciones que generan impacto, confianza y cierre"]},
+      conocimiento_tecnico:{low:["Conocimiento técnico limitado para su nivel de seniority","No domina el portfolio completo de la compañía"],mid:["Buen conocimiento de su área principal","Portfolio amplio en desarrollo progresivo"],high:["Conocimiento experto, actualizado y de referencia","Discurso estratégico sólido más allá de su área de responsabilidad"]}
+    }
+  },
+  "Manager": {
+    weights: {capacidad_analitica:0.15,excelencia_entrega:0.20,trabajo_equipo:0.20,gestion:0.20,interlocucion:0.15,conocimiento_tecnico:0.10},
+    criteria: {
+      capacidad_analitica:["Analiza el proyecto innovando para ofrecer soluciones diferenciales de alto valor","Asimila información eficientemente y genera recomendaciones clave y realistas"],
+      excelencia_entrega:["Lidera múltiples proyectos/oportunidades simultáneamente con ownership total","Define y desarrolla un offering convirtiéndose en su referente"],
+      trabajo_equipo:["Su liderazgo es reconocido por el equipo con predisposición y proactividad diarias","Asegura el desarrollo profesional del equipo y gestiona el staffing a medio plazo"],
+      gestion:["Gestiona presupuestos de múltiples proyectos con fiabilidad económica consistente","Planifica y mantiene actualizada la previsión de recursos a medio/largo plazo"],
+      interlocucion:["Referente técnico y gestor reconocido por mercados más allá de su equipo","Discurso ejecutivo, orientado a decisión y con capacidad vendedora demostrada"],
+      conocimiento_tecnico:["Dominio profundo del portfolio DIC y arquitecturas cloud/workplace/híbrido","Conoce las prioridades estratégicas y el marco competitivo del negocio"]
+    },
+    suggestions: {
+      capacidad_analitica:{low:["Falta innovación y diferenciación en el análisis de proyectos","Sus recomendaciones no siempre son realistas o implementables"],mid:["Análisis sólido en contextos conocidos","Recomendaciones correctas aunque con margen de diferenciación"],high:["Análisis diferencial reconocido por mercados y dirección","Recomendaciones siempre realistas, accionables y de alto valor"]},
+      excelencia_entrega:{low:["Dificultades en la gestión simultánea de múltiples oportunidades","El offering no está suficientemente desarrollado para su nivel"],mid:["Gestión multi-proyecto correcta con apoyo puntual","Offering en construcción con avances visibles"],high:["Referente en gestión multi-proyecto sin supervisión","Offering sólido y reconocido como diferencial en el mercado"]},
+      trabajo_equipo:{low:["Liderazgo no reconocido por el equipo de forma consistente","Desarrollo del equipo no planificado ni asegurado"],mid:["Liderazgo reconocido en el equipo directo","Apoya el desarrollo aunque sin plan formal estructurado"],high:["Liderazgo unánimemente reconocido dentro y fuera del equipo","Plan de desarrollo claro y seguido para cada miembro del equipo"]},
+      gestion:{low:["Gestión económica de múltiples proyectos con gaps importantes","Sin visión de recursos a medio/largo plazo"],mid:["Gestión económica correcta en proyectos principales","Planificación de recursos en desarrollo progresivo"],high:["Referente en gestión económica multi-proyecto","Visión anticipada y precisa de recursos a medio/largo plazo"]},
+      interlocucion:{low:["No reconocido como referente externo al equipo inmediato","Discurso comercial mejorable ante mercados y dirección"],mid:["Referente en su perímetro directo de trabajo","Discurso ejecutivo y comercial en desarrollo visible"],high:["Referente claro para mercados y áreas más allá de su equipo","Discurso ejecutivo sólido, vendedor y orientado a cierre"]},
+      conocimiento_tecnico:{low:["Conocimiento técnico insuficiente para su nivel de responsabilidad","Dependencia de expertos en decisiones técnicas clave"],mid:["Buen conocimiento funcional de su área principal","Profundidad técnica en desarrollo hacia niveles más avanzados"],high:["Dominio técnico amplio y reconocido como referente","Visión estratégica clara del portfolio y del entorno competitivo"]}
+    }
+  },
+  "Project Manager": {
+    weights: {capacidad_analitica:0.20,excelencia_entrega:0.20,trabajo_equipo:0.20,gestion:0.20,interlocucion:0.10,conocimiento_tecnico:0.10},
+    criteria: {
+      capacidad_analitica:["Valida coherencia técnica y económica de las ofertas bajo su responsabilidad","Genera hipótesis y enfoques diferenciales con criterio propio"],
+      excelencia_entrega:["Lidera ofertas complejas E2E con autonomía y delivery impecable","Se responsabiliza del éxito del proyecto innovando y aportando alto valor"],
+      trabajo_equipo:["Liderazgo reconocido por el equipo; predisposición y proactividad diarias","Fomenta el desarrollo profesional y el sentido de pertenencia"],
+      gestion:["Gestiona presupuesto y recursos con fiabilidad económica demostrada","Mantiene actualizada la previsión de recursos a corto/medio plazo"],
+      interlocucion:["Referente ante el cliente del avance y resultado final del proyecto","Gestión eficaz de expectativas; discurso ejecutivo y orientado a decisión"],
+      conocimiento_tecnico:["Dominio profundo del offering de su sector de actividad","Conoce las prioridades estratégicas y el entorno competitivo"]
+    },
+    suggestions: {
+      capacidad_analitica:{low:["Falta rigor en la validación económica de las ofertas","No genera hipótesis propias con consistencia"],mid:["Valida correctamente con apoyo puntual","Genera hipótesis en contextos conocidos y acotados"],high:["Rigor económico destacado y consistente","Enfoques diferenciales habituales y bien fundamentados","Criterio propio sólido reconocido por el equipo"]},
+      excelencia_entrega:{low:["Dificultades en la gestión E2E de proyectos complejos","Entregables con gaps frecuentes bajo su responsabilidad"],mid:["Lidera con apoyo en proyectos de mayor complejidad","Buen delivery en contextos acotados y bien definidos"],high:["Lidera proyectos complejos sin necesidad de supervisión","Delivery impecable de forma sistemática y consistente"]},
+      trabajo_equipo:{low:["Liderazgo no reconocido aún por el equipo","Poco implicado en el desarrollo de los perfiles a su cargo"],mid:["Liderazgo en desarrollo progresivo","Apoya el crecimiento del equipo con soporte externo"],high:["Referente de liderazgo indiscutible en el equipo","Motor activo y estructurado del desarrollo profesional de otros"]},
+      gestion:{low:["Gestión económica con gaps importantes","Falta ownership en tareas y decisiones críticas"],mid:["Gestión correcta en contextos acotados","Ownership parcial en sus responsabilidades principales"],high:["Referente en gestión económica y de recursos","Ownership total, fiable y consistente en todo su perímetro"]},
+      interlocucion:{low:["No reconocido como referente por el cliente aún","Discurso mejorable ante interlocutores externos"],mid:["Referente en entornos y clientes conocidos","Discurso ejecutivo en desarrollo ante nuevos interlocutores"],high:["Referente claro para clientes y mercados","Discurso ejecutivo sólido, orientado a decisión y cierre"]},
+      conocimiento_tecnico:{low:["Conocimiento técnico insuficiente para su nivel de responsabilidad","Dependencia de expertos en sesiones técnicas clave"],mid:["Buen conocimiento funcional de su área principal","Conocimiento técnico en desarrollo hacia niveles más avanzados"],high:["Dominio técnico sólido y reconocido","Referente en sesiones con expertos internos y externos"]}
+    }
+  },
+  "Senior Manager": {
+    weights: {capacidad_analitica:0.10,excelencia_entrega:0.20,trabajo_equipo:0.20,gestion:0.20,interlocucion:0.20,conocimiento_tecnico:0.10},
+    criteria: {
+      capacidad_analitica:["Visión estratégica aplicada: genera planteamientos diferenciales en mercado y competencia","Participa en la definición de la estrategia de negocio de la unidad"],
+      excelencia_entrega:["Lidera la elaboración de la oferta y la venta con modelos comerciales innovadores","Asegura calidad en todos los entregables de su equipo de forma consistente"],
+      trabajo_equipo:["Diseña y planifica el desarrollo profesional de los equipos a su cargo","Transmite activamente cultura y directrices; liderazgo reconocido unánimemente"],
+      gestion:["Gestiona el presupuesto del área con visión global de planificación de recursos","Conoce el avance de operaciones, costes pendientes y cobros/pagos ejecutados"],
+      interlocucion:["Nivel elevado de interlocución con cliente; relaciones sólidas y duraderas","Capaz de negociar condiciones y contrato; crea necesidades con soluciones innovadoras"],
+      conocimiento_tecnico:["Conoce las soluciones de toda la compañía y el entorno competitivo","Referente en la creación de nuevo offering y/o lanzamiento de nuevas zonas"]
+    },
+    suggestions: {
+      capacidad_analitica:{low:["Falta visión estratégica en el análisis del negocio","No genera planteamientos diferenciales de forma consistente"],mid:["Análisis estratégico presente pero en desarrollo","Planteamientos diferenciales ocasionales, no sistemáticos"],high:["Visión estratégica clara, aplicada y reconocida por la dirección","Generador habitual de enfoques diferenciales de alto impacto"]},
+      excelencia_entrega:{low:["No lidera la venta de forma consistente","Gaps visibles en la calidad de entregables del equipo"],mid:["Lidera la venta con apoyo ocasional de dirección","Supervisa la calidad del equipo aunque sin profundidad suficiente"],high:["Referente indiscutible en liderazgo de oferta y venta","Su equipo produce entregables de alto nivel de forma sistemática"]},
+      trabajo_equipo:{low:["Desarrollo del equipo no planificado ni ejecutado","Liderazgo no reconocido de forma unánime por el equipo"],mid:["Apoya el desarrollo aunque sin plan formal estructurado","Liderazgo reconocido en el equipo directo"],high:["Plan de desarrollo claro, seguido y con impacto visible","Liderazgo unánimemente reconocido dentro y fuera de la unidad"]},
+      gestion:{low:["Gestión presupuestaria del área con gaps importantes","Sin visión global de planificación de recursos"],mid:["Gestión económica correcta en ciclos conocidos","Planificación de recursos a medio plazo en desarrollo"],high:["Gestión presupuestaria excelente y anticipada","Visión global precisa de recursos y operaciones en todo momento"]},
+      interlocucion:{low:["Interlocución con clientes clave por desarrollar","Relaciones con mercados estratégicos superficiales o inexistentes"],mid:["Buenas relaciones en su perímetro actual de trabajo","Interlocución ejecutiva en desarrollo hacia niveles superiores"],high:["Referente visible y reconocido por clientes estratégicos","Red de relaciones sólida, estratégica y generadora de negocio"]},
+      conocimiento_tecnico:{low:["Conocimiento del portfolio global de la compañía limitado","Sin visión clara del entorno competitivo del negocio"],mid:["Buen conocimiento de su área de responsabilidad directa","Portfolio global y competencia en desarrollo progresivo"],high:["Conocimiento amplio del portfolio global de Indra","Visión estratégica y competitiva clara, aplicada y comunicada"]}
+    }
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const state = {
+  view: "login",        // login | evalList | evalForm | done | adminDash | adminReport | adminConfig
+  isAdmin: false,
+  currentUser: null,    // { id, name, email }
+  currentSubject: null, // { ID, Nombre, Rol, Grado }
+  scores: {},           // { driverId: { score, pick, comment } }
+  team: [],
+  evaluators: [],
+  responses: [],
+  adminTab: "dashboard", // dashboard | team | evaluators
+  reportSubject: null,
+  editingTeamItem: null,
+  editingEvalItem: null,
+  formData: {},
+  loading: false,
+  digestValue: null
+};
+
+// ═══════════════════════════════════════════════════════
+// SHAREPOINT API
+// ═══════════════════════════════════════════════════════
+async function spRequest(url, options = {}) {
+  const res = await fetch(`${CONFIG.siteUrl}/_api/${url}`, {
+    ...options,
+    headers: {
+      "Accept": "application/json;odata=verbose",
+      "Content-Type": "application/json;odata=verbose",
+      ...(options.headers || {})
+    },
+    credentials: "include"
+  });
+  if (!res.ok) throw new Error(`SP Error ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+async function getDigest() {
+  if (state.digestValue) return state.digestValue;
+  const res = await fetch(`${CONFIG.siteUrl}/_api/contextinfo`, {
+    method: "POST",
+    headers: { "Accept": "application/json;odata=verbose" },
+    credentials: "include"
+  });
+  const data = await res.json();
+  state.digestValue = data.d.GetContextWebInformation.FormDigestValue;
+  setTimeout(() => { state.digestValue = null; }, 1500000); // 25 min expiry
+  return state.digestValue;
+}
+
+async function getListItems(listName, filter = "") {
+  const url = `web/lists/getbytitle('${listName}')/items${filter ? "?$filter=" + filter : ""}`;
+  const data = await spRequest(url);
+  return data.d.results;
+}
+
+async function createListItem(listName, itemData) {
+  const digest = await getDigest();
+  const metadata = { "__metadata": { "type": `SP.Data.${listName}ListItem` } };
+  return spRequest(`web/lists/getbytitle('${listName}')/items`, {
+    method: "POST",
+    headers: { "X-RequestDigest": digest },
+    body: JSON.stringify({ ...metadata, ...itemData })
+  });
+}
+
+async function updateListItem(listName, itemId, itemData) {
+  const digest = await getDigest();
+  return spRequest(`web/lists/getbytitle('${listName}')/items(${itemId})`, {
+    method: "POST",
+    headers: {
+      "X-RequestDigest": digest,
+      "X-HTTP-Method": "MERGE",
+      "IF-MATCH": "*"
+    },
+    body: JSON.stringify({ "__metadata": { "type": `SP.Data.${listName}ListItem` }, ...itemData })
+  });
+}
+
+async function deleteListItem(listName, itemId) {
+  const digest = await getDigest();
+  return spRequest(`web/lists/getbytitle('${listName}')/items(${itemId})`, {
+    method: "POST",
+    headers: { "X-RequestDigest": digest, "X-HTTP-Method": "DELETE", "IF-MATCH": "*" }
+  });
+}
+
+async function getCurrentUser() {
+  const data = await spRequest("web/currentuser");
+  return { id: data.d.Id, name: data.d.Title, email: data.d.Email };
+}
+
+// ═══════════════════════════════════════════════════════
+// LOAD DATA
+// ═══════════════════════════════════════════════════════
+async function loadTeam() {
+  state.team = await getListItems(CONFIG.lists.equipo, "Activo eq 1");
+}
+
+async function loadEvaluators() {
+  state.evaluators = await getListItems(CONFIG.lists.evaluadores, "Activo eq 1");
+}
+
+async function loadResponses(subjectId = null) {
+  const filter = subjectId
+    ? `EvaluadoID eq ${subjectId} and Periodo eq '${CONFIG.periodo}'`
+    : `Periodo eq '${CONFIG.periodo}'`;
+  state.responses = await getListItems(CONFIG.lists.respuestas, filter);
+}
+
+function hasSubmitted(subjectId) {
+  return state.responses.some(r => r.EvaluadoID === subjectId && r.EvaluadorID === state.currentUser?.id);
+}
+
+// ═══════════════════════════════════════════════════════
+// CALCULATIONS
+// ═══════════════════════════════════════════════════════
+function calcWeightedAvg(responses, role) {
+  if (!responses.length) return null;
+  const cfg = DRIVERS_CONFIG[role];
+  if (!cfg) return null;
+  let total = 0;
+  responses.forEach(r => {
+    DRIVER_ORDER.forEach(d => {
+      const fieldName = `Score_${d.split("_").map((w,i) => i===0 ? w.charAt(0).toUpperCase()+w.slice(1) : w.charAt(0).toUpperCase()+w.slice(1)).join("")}`;
+      const score = r[fieldName];
+      if (score) total += score * (cfg.weights[d] || 0);
+    });
+  });
+  return (total / responses.length).toFixed(2);
+}
+
+function getFieldName(driverId, prefix) {
+  const map = {
+    capacidad_analitica: "CapAnalit",
+    excelencia_entrega: "ExcEntrega",
+    trabajo_equipo: "TrabEquipo",
+    gestion: "Gestion",
+    interlocucion: "Interlocucion",
+    conocimiento_tecnico: "ConocTecnico"
+  };
+  return `${prefix}_${map[driverId]}`;
+}
+
+function calcDriverAvg(responses, driverId) {
+  const field = getFieldName(driverId, "Score");
+  const scores = responses.map(r => r[field]).filter(s => s > 0);
+  if (!scores.length) return null;
+  return (scores.reduce((a,b) => a+b, 0) / scores.length).toFixed(1);
+}
+
+function getScoreColor(score) {
+  if (!score) return "var(--faint)";
+  const s = Math.round(parseFloat(score));
+  return SCORE_META[s]?.color || "var(--faint)";
+}
+
+function getScoreBg(score) {
+  if (!score) return "#F1F5F9";
+  const s = Math.round(parseFloat(score));
+  return SCORE_META[s]?.bg || "#F1F5F9";
+}
+
+function getBand(score) {
+  if (!score) return null;
+  if (score <= 2) return "low";
+  if (score === 3) return "mid";
+  return "high";
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER HELPERS
+// ═══════════════════════════════════════════════════════
+function el(tag, attrs = {}, ...children) {
+  const e = document.createElement(tag);
+  Object.entries(attrs).forEach(([k, v]) => {
+    if (k === "className") e.className = v;
+    else if (k === "style") Object.assign(e.style, v);
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2).toLowerCase(), v);
+    else e.setAttribute(k, v);
+  });
+  children.forEach(c => {
+    if (c === null || c === undefined) return;
+    if (typeof c === "string" || typeof c === "number") e.appendChild(document.createTextNode(c));
+    else if (c instanceof Node) e.appendChild(c);
+  });
+  return e;
+}
+
+function renderTopbar() {
+  if (state.view === "login") return null;
+  const bar = el("div", {className: "topbar"});
+  const left = el("div", {style: {display:"flex", alignItems:"center", gap:"8px"}});
+  left.appendChild(el("span", {className:"topbar-title"}, "Evaluación 360°"));
+  left.appendChild(el("span", {className:"topbar-sub"}, "DNIDW · " + CONFIG.periodo));
+  bar.appendChild(left);
+
+  const right = el("div", {className:"topbar-right"});
+  const badgeClass = state.isAdmin ? "badge badge-admin" : "badge badge-eval";
+  const badgeText = state.isAdmin ? "Administrador" : "Evaluador";
+  right.appendChild(el("span", {className: badgeClass}, badgeText));
+  right.appendChild(el("button", {className:"btn-exit", onClick: () => {
+    state.view = "login"; state.isAdmin = false; state.currentUser = null;
+    state.scores = {}; render();
+  }}, "Salir"));
+  bar.appendChild(right);
+  return bar;
+}
+
+function renderProgressBar(value, color) {
+  const wrap = el("div", {className:"progress-bar"});
+  const fill = el("div", {className:"progress-fill", style:{width:`${value*100}%`, background: color || "var(--indra)"}});
+  wrap.appendChild(fill);
+  return wrap;
+}
+
+function renderRadar(scores, role) {
+  const cfg = DRIVERS_CONFIG[role];
+  if (!cfg) return el("div");
+  const n = DRIVER_ORDER.length;
+  const cx = 130, cy = 130, r = 90;
+  const angleStep = (2 * Math.PI) / n;
+  const getCoord = (i, val, maxVal = 5) => {
+    const angle = i * angleStep - Math.PI / 2;
+    const dist = (val / maxVal) * r;
+    return { x: cx + dist * Math.cos(angle), y: cy + dist * Math.sin(angle) };
+  };
+
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("width", "260");
+  svg.setAttribute("height", "260");
+  svg.style.overflow = "visible";
+
+  [1,2,3,4,5].forEach(level => {
+    const pts = DRIVER_ORDER.map((_,i) => { const c = getCoord(i, level); return `${c.x},${c.y}`; }).join(" ");
+    const poly = document.createElementNS(svgNS, "polygon");
+    poly.setAttribute("points", pts);
+    poly.setAttribute("fill", "none");
+    poly.setAttribute("stroke", "#E2E8F0");
+    poly.setAttribute("stroke-width", level === 5 ? "1.5" : "0.8");
+    svg.appendChild(poly);
+  });
+
+  DRIVER_ORDER.forEach((_,i) => {
+    const end = getCoord(i, 5);
+    const line = document.createElementNS(svgNS, "line");
+    line.setAttribute("x1", cx); line.setAttribute("y1", cy);
+    line.setAttribute("x2", end.x); line.setAttribute("y2", end.y);
+    line.setAttribute("stroke", "#E2E8F0"); line.setAttribute("stroke-width", "0.8");
+    svg.appendChild(line);
+  });
+
+  const pts = DRIVER_ORDER.map((d,i) => {
+    const avg = scores[d] ? parseFloat(scores[d]) : 0;
+    const c = getCoord(i, avg);
+    return `${c.x},${c.y}`;
+  }).join(" ");
+  const dataPoly = document.createElementNS(svgNS, "polygon");
+  dataPoly.setAttribute("points", pts);
+  dataPoly.setAttribute("fill", "rgba(0,61,165,0.15)");
+  dataPoly.setAttribute("stroke", "#003DA5");
+  dataPoly.setAttribute("stroke-width", "2");
+  svg.appendChild(dataPoly);
+
+  DRIVER_ORDER.forEach((d,i) => {
+    const avg = scores[d] ? parseFloat(scores[d]) : 0;
+    const c = getCoord(i, avg);
+    const dot = document.createElementNS(svgNS, "circle");
+    dot.setAttribute("cx", c.x); dot.setAttribute("cy", c.y);
+    dot.setAttribute("r", "4"); dot.setAttribute("fill", "#003DA5");
+    svg.appendChild(dot);
+  });
+
+  DRIVER_ORDER.forEach((d,i) => {
+    const label = getCoord(i, 5.8);
+    const lines = DRIVER_NAMES[d].split(" ");
+    const text = document.createElementNS(svgNS, "text");
+    text.setAttribute("x", label.x); text.setAttribute("y", label.y);
+    text.setAttribute("text-anchor", "middle");
+    text.setAttribute("font-size", "9");
+    text.setAttribute("fill", "#64748B");
+    text.setAttribute("font-weight", "600");
+    lines.forEach((l, li) => {
+      const tspan = document.createElementNS(svgNS, "tspan");
+      tspan.setAttribute("x", label.x);
+      tspan.setAttribute("dy", li === 0 ? "0" : "11");
+      tspan.textContent = l;
+      text.appendChild(tspan);
+    });
+    svg.appendChild(text);
+  });
+
+  const wrap = el("div", {className:"radar-container"});
+  wrap.appendChild(svg);
+  return wrap;
+}
+
+// ═══════════════════════════════════════════════════════
+// VIEWS
+// ═══════════════════════════════════════════════════════
+function renderLogin() {
+  const wrap = el("div", {className:"login-wrap"});
+  wrap.appendChild(el("div", {className:"login-badge"}, "DNIDW · " + CONFIG.periodo));
+  wrap.appendChild(el("div", {className:"login-title"}, "Evaluación 360°"));
+  wrap.appendChild(el("div", {className:"login-desc"}, "Sistema de evaluación continua del equipo.\nAnónimo para el evaluado. Transparente para el administrador."));
+
+  const btns = el("div", {className:"login-btns"});
+  const btnEval = el("button", {className:"btn btn-primary btn-full", onClick: async () => {
+    state.loading = true; render();
+    try {
+      state.currentUser = await getCurrentUser();
+      await loadTeam();
+      await loadResponses();
+      state.isAdmin = false;
+      state.view = "evalList";
+    } catch(e) {
+      alert("Error al conectar con SharePoint: " + e.message);
+    }
+    state.loading = false; render();
+  }}, "Soy evaluador — Dar feedback");
+
+  const btnAdmin = el("button", {className:"btn btn-secondary btn-full", onClick: async () => {
+    state.loading = true; render();
+    try {
+      state.currentUser = await getCurrentUser();
+      if (state.currentUser.email.toLowerCase() !== CONFIG.adminEmail.toLowerCase()) {
+        alert("Acceso restringido al administrador.");
+        state.loading = false; render(); return;
+      }
+      await loadTeam(); await loadEvaluators(); await loadResponses();
+      state.isAdmin = true; state.view = "adminDash";
+    } catch(e) {
+      alert("Error al conectar con SharePoint: " + e.message);
+    }
+    state.loading = false; render();
+  }}, "Soy administrador — Ver resultados");
+
+  btns.appendChild(btnEval); btns.appendChild(btnAdmin);
+  wrap.appendChild(btns);
+  return wrap;
+}
+
+function renderEvalList() {
+  const cont = el("div", {className:"container"});
+  cont.appendChild(el("div", {className:"page-title"}, "Hola, " + (state.currentUser?.name?.split(" ")[0] || "")));
+  cont.appendChild(el("div", {className:"page-sub"}, "Selecciona a quién deseas evaluar. Tu identidad es anónima para el evaluado."));
+
+  state.team.forEach(member => {
+    const submitted = hasSubmitted(member.ID);
+    const item = el("div", {className: "eval-item" + (submitted ? " done" : "")});
+
+    const info = el("div");
+    info.appendChild(el("div", {className:"eval-item-name"}, member.Nombre));
+    info.appendChild(el("div", {className:"eval-item-sub"}, `${member.Rol} · Grado ${member.Grado}`));
+    item.appendChild(info);
+
+    if (submitted) {
+      item.appendChild(el("span", {className:"pill pill-done"}, "✓ Enviada"));
+    } else {
+      const pill = el("span", {className:"pill pill-pending"}, "Evaluar →");
+      item.appendChild(pill);
+      item.addEventListener("click", () => {
+        state.currentSubject = member;
+        state.scores = {};
+        state.view = "evalForm";
+        render();
+      });
+    }
+    cont.appendChild(item);
+  });
+
+  return cont;
+}
+
+function renderEvalForm() {
+  const subject = state.currentSubject;
+  const cfg = DRIVERS_CONFIG[subject.Rol] || DRIVERS_CONFIG["Senior Consultant"];
+  const cont = el("div", {className:"container"});
+
+  // Back button
+  const back = el("button", {className:"btn btn-secondary btn-sm", style:{marginBottom:"16px"}, onClick: () => { state.view = "evalList"; render(); }}, "← Volver");
+  cont.appendChild(back);
+
+  // Subject header
+  const header = el("div", {className:"card card-blue", style:{marginBottom:"16px"}});
+  const hRow = el("div", {style:{display:"flex", justifyContent:"space-between", alignItems:"center"}});
+  const hLeft = el("div");
+  hLeft.appendChild(el("div", {style:{fontWeight:"800", fontSize:"16px", color:"var(--indra)"}}, subject.Nombre));
+  hLeft.appendChild(el("div", {style:{fontSize:"13px", color:"var(--muted)", marginTop:"4px"}}, `${subject.Rol} · Grado ${subject.Grado}`));
+  hRow.appendChild(hLeft);
+  const completed = DRIVER_ORDER.filter(d => state.scores[d]?.score).length;
+  const hRight = el("div", {style:{textAlign:"right"}});
+  hRight.appendChild(el("div", {style:{fontSize:"12px", color:"var(--muted)"}}, "Progreso"));
+  hRight.appendChild(el("div", {id:"progress-count", style:{fontSize:"18px", fontWeight:"800", color:"var(--indra)"}}, `${completed}/${DRIVER_ORDER.length}`));
+  hRow.appendChild(hRight);
+  header.appendChild(hRow);
+  const progBar = renderProgressBar(completed / DRIVER_ORDER.length);
+  progBar.style.marginTop = "10px";
+  header.appendChild(progBar);
+  cont.appendChild(header);
+
+  // Alert
+  const alert = el("div", {className:"alert alert-warn"});
+  alert.innerHTML = "💡 Evalúa del <strong>1 (No cumple)</strong> al <strong>5 (Excepcional)</strong>. Las puntuaciones de 5 requieren justificación obligatoria.";
+  cont.appendChild(alert);
+
+  // Driver cards
+  DRIVER_ORDER.forEach(dId => {
+    const d = cfg;
+    const driverCard = el("div", {className:"driver-card"});
+
+    // Header
+    const dHeader = el("div", {className:"driver-header"});
+    const dLeft = el("div", {className:"driver-name"});
+    dLeft.appendChild(document.createTextNode(DRIVER_ICONS[dId]));
+    const dNameWrap = el("div");
+    dNameWrap.appendChild(el("div", {}, DRIVER_NAMES[dId]));
+    dNameWrap.appendChild(el("div", {className:"driver-weight"}, `Peso ${(cfg.weights[dId]*100).toFixed(0)}%`));
+    dLeft.appendChild(dNameWrap);
+    dHeader.appendChild(dLeft);
+
+    const scoreVal = state.scores[dId]?.score;
+    if (scoreVal) {
+      const sb = el("span", {className:"score-badge"});
+      sb.style.background = SCORE_META[scoreVal].bg;
+      sb.style.color = SCORE_META[scoreVal].color;
+      sb.textContent = `${scoreVal} — ${SCORE_META[scoreVal].short}`;
+      dHeader.appendChild(sb);
+    }
+    driverCard.appendChild(dHeader);
+
+    // Criteria
+    const crit = el("div", {className:"driver-criteria"});
+    const critList = el("ul");
+    (cfg.criteria[dId] || []).forEach(c => {
+      critList.appendChild(el("li", {}, c));
+    });
+    crit.appendChild(critList);
+    driverCard.appendChild(crit);
+
+    // Score buttons
+    const scoreRow = el("div", {className:"score-row"});
+    [1,2,3,4,5].forEach(s => {
+      const btn = el("button", {className:`score-btn${scoreVal === s ? ` active-${s}` : ""}`}, String(s));
+      btn.addEventListener("click", () => {
+        if (!state.scores[dId]) state.scores[dId] = {};
+        state.scores[dId].score = s;
+        state.scores[dId].pick = "";
+        renderDriverSection(driverCard, dId, cfg);
+        updateProgress();
+      });
+      scoreRow.appendChild(btn);
+    });
+    if (scoreVal) {
+      const lbl = el("span", {className:"score-label"});
+      lbl.style.color = SCORE_META[scoreVal].color;
+      lbl.textContent = SCORE_META[scoreVal].label;
+      scoreRow.appendChild(lbl);
+    }
+    driverCard.appendChild(scoreRow);
+
+    // Suggestions + comment (rendered in sub-function)
+    const bottomSection = el("div", {id:`bottom-${dId}`});
+    driverCard.appendChild(bottomSection);
+    renderSuggestionsSection(bottomSection, dId, cfg);
+
+    cont.appendChild(driverCard);
+  });
+
+  // Submit button
+  const submitWrap = el("div", {style:{marginTop:"8px"}});
+  const submitBtn = el("button", {id:"submit-btn", className:"btn btn-primary btn-full"}, "Enviar evaluación →");
+  submitBtn.disabled = !canSubmit();
+  submitBtn.addEventListener("click", submitEvaluation);
+  submitWrap.appendChild(submitBtn);
+  cont.appendChild(submitWrap);
+
+  return cont;
+}
+
+function renderDriverSection(driverCard, dId, cfg) {
+  // Re-render score buttons
+  const scoreRow = driverCard.querySelector(".score-row");
+  const scoreVal = state.scores[dId]?.score;
+  scoreRow.innerHTML = "";
+  [1,2,3,4,5].forEach(s => {
+    const btn = el("button", {className:`score-btn${scoreVal === s ? ` active-${s}` : ""}`}, String(s));
+    btn.addEventListener("click", () => {
+      if (!state.scores[dId]) state.scores[dId] = {};
+      state.scores[dId].score = s;
+      state.scores[dId].pick = "";
+      renderDriverSection(driverCard, dId, cfg);
+      updateProgress();
+    });
+    scoreRow.appendChild(btn);
+  });
+  if (scoreVal) {
+    const lbl = el("span", {className:"score-label"});
+    lbl.style.color = SCORE_META[scoreVal].color;
+    lbl.textContent = SCORE_META[scoreVal].label;
+    scoreRow.appendChild(lbl);
+  }
+
+  // Re-render bottom section
+  const bottomSection = driverCard.querySelector(`#bottom-${dId}`);
+  renderSuggestionsSection(bottomSection, dId, cfg);
+
+  // Update header badge
+  const dHeader = driverCard.querySelector(".driver-header");
+  const existingBadge = dHeader.querySelector(".score-badge");
+  if (existingBadge) existingBadge.remove();
+  if (scoreVal) {
+    const sb = el("span", {className:"score-badge"});
+    sb.style.background = SCORE_META[scoreVal].bg;
+    sb.style.color = SCORE_META[scoreVal].color;
+    sb.textContent = `${scoreVal} — ${SCORE_META[scoreVal].short}`;
+    dHeader.appendChild(sb);
+  }
+
+  updateSubmitBtn();
+}
+
+function renderSuggestionsSection(container, dId, cfg) {
+  container.innerHTML = "";
+  const scoreVal = state.scores[dId]?.score;
+  if (!scoreVal) return;
+
+  const band = getBand(scoreVal);
+  const suggs = cfg.suggestions?.[dId]?.[band] || [];
+  const currentPick = state.scores[dId]?.pick || "";
+
+  if (scoreVal === 5) {
+    const note = el("div", {className:"score-note required"}, "⚠ Puntuación 5 — Justificación obligatoria");
+    container.appendChild(note);
+  } else {
+    const note = el("div", {className:"score-note"}, SCORE_META[scoreVal].label);
+    note.style.color = SCORE_META[scoreVal].color;
+    container.appendChild(note);
+  }
+
+  if (suggs.length) {
+    const suggLabel = el("div", {style:{fontSize:"11px", color:"var(--faint)", fontWeight:"600", marginBottom:"6px"}}, "Comentarios sugeridos:");
+    container.appendChild(suggLabel);
+    const suggWrap = el("div", {className:"suggestions"});
+    suggs.forEach(s => {
+      const btn = el("button", {className:`suggestion-btn${currentPick === s ? " selected" : ""}`}, s);
+      if (currentPick === s) {
+        btn.style.borderColor = SCORE_META[scoreVal].color;
+        btn.style.color = SCORE_META[scoreVal].color;
+        btn.style.background = SCORE_META[scoreVal].bg;
+      }
+      btn.addEventListener("click", () => {
+        if (!state.scores[dId]) state.scores[dId] = {};
+        state.scores[dId].pick = currentPick === s ? "" : s;
+        renderSuggestionsSection(container, dId, cfg);
+        updateSubmitBtn();
+      });
+      suggWrap.appendChild(btn);
+    });
+    container.appendChild(suggWrap);
+  }
+
+  const ta = el("textarea", {
+    placeholder: scoreVal === 5 ? "Justificación obligatoria: explica por qué es una ejecución excepcional..." : "Comentario adicional (opcional)...",
+    rows: "2"
+  });
+  ta.value = state.scores[dId]?.comment || "";
+  if (scoreVal === 5 && !state.scores[dId]?.comment && !currentPick) {
+    ta.className = "required-border";
+  }
+  ta.addEventListener("input", () => {
+    if (!state.scores[dId]) state.scores[dId] = {};
+    state.scores[dId].comment = ta.value;
+    updateSubmitBtn();
+  });
+  container.appendChild(ta);
+}
+
+function canSubmit() {
+  return DRIVER_ORDER.every(d => {
+    const v = state.scores[d];
+    if (!v?.score) return false;
+    if (v.score === 5 && !v.comment && !v.pick) return false;
+    return true;
+  });
+}
+
+function updateProgress() {
+  const completed = DRIVER_ORDER.filter(d => state.scores[d]?.score).length;
+  const countEl = document.getElementById("progress-count");
+  if (countEl) countEl.textContent = `${completed}/${DRIVER_ORDER.length}`;
+  updateSubmitBtn();
+}
+
+function updateSubmitBtn() {
+  const btn = document.getElementById("submit-btn");
+  if (btn) btn.disabled = !canSubmit();
+}
+
+async function submitEvaluation() {
+  state.loading = true; render();
+  try {
+    const item = {
+      EvaluadorID: state.currentUser.id,
+      EvaluadorNombre: state.currentUser.name,
+      EvaluadoID: state.currentSubject.ID,
+      EvaluadoNombre: state.currentSubject.Nombre,
+      Periodo: CONFIG.periodo,
+      FechaEnvio: new Date().toISOString()
+    };
+    DRIVER_ORDER.forEach(d => {
+      const v = state.scores[d] || {};
+      const map = { capacidad_analitica:"CapAnalit", excelencia_entrega:"ExcEntrega", trabajo_equipo:"TrabEquipo", gestion:"Gestion", interlocucion:"Interlocucion", conocimiento_tecnico:"ConocTecnico" };
+      const key = map[d];
+      item[`Score_${key}`] = v.score || 0;
+      item[`Pick_${key}`] = v.pick || "";
+      item[`Comment_${key}`] = v.comment || "";
+    });
+    await createListItem(CONFIG.lists.respuestas, item);
+    await loadResponses();
+    state.view = "done";
+  } catch(e) {
+    alert("Error al guardar: " + e.message);
+  }
+  state.loading = false; render();
+}
+
+function renderDone() {
+  const wrap = el("div", {className:"done-wrap"});
+  wrap.appendChild(el("div", {className:"done-icon"}, "✅"));
+  wrap.appendChild(el("div", {style:{fontSize:"20px",fontWeight:"800",color:"var(--text)",marginBottom:"8px"}}, "Evaluación enviada"));
+  wrap.appendChild(el("div", {style:{color:"var(--muted)",marginBottom:"24px",fontSize:"14px"}},
+    `Tu evaluación de ${state.currentSubject?.Nombre} ha sido registrada de forma anónima.`));
+  const btn = el("button", {className:"btn btn-primary", onClick: () => { state.view = "evalList"; render(); }}, "Evaluar a otro compañero");
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+// ═══ ADMIN DASHBOARD ═══
+function renderAdminDash() {
+  const cont = el("div", {className:"container-wide"});
+  cont.appendChild(el("div", {className:"page-title"}, "Panel de resultados"));
+  cont.appendChild(el("div", {className:"page-sub"}, "Tiempo real · " + CONFIG.periodo));
+
+  const totalResp = state.responses.length;
+  const totalEvals = state.evaluators.length;
+  const stats = el("div", {className:"stats-grid"});
+  [
+    {n: state.team.length, l: "Evaluados activos"},
+    {n: totalEvals, l: "Evaluadores activos"},
+    {n: totalResp, l: "Total respuestas"}
+  ].forEach(({n,l}) => {
+    const sc = el("div", {className:"stat-card"});
+    sc.appendChild(el("div", {className:"stat-number"}, String(n)));
+    sc.appendChild(el("div", {className:"stat-label"}, l));
+    stats.appendChild(sc);
+  });
+  cont.appendChild(stats);
+
+  state.team.forEach(member => {
+    const memberResponses = state.responses.filter(r => r.EvaluadoID === member.ID);
+    const avg = calcWeightedAvg(memberResponses, member.Rol);
+    const avgNum = avg ? parseFloat(avg) : 0;
+    const pct = totalEvals > 0 ? memberResponses.length / totalEvals : 0;
+    const card = el("div", {className:"subject-card"});
+    card.addEventListener("click", async () => {
+      state.reportSubject = member;
+      await loadResponses(member.ID);
+      state.view = "adminReport"; render();
+    });
+
+    const cardHeader = el("div", {className:"subject-card-header"});
+    const left = el("div");
+    left.appendChild(el("div", {style:{fontWeight:"700",fontSize:"15px",color:"var(--text)"}}, member.Nombre));
+    left.appendChild(el("div", {style:{fontSize:"12px",color:"var(--faint)",marginTop:"2px"}}, `${member.Rol} · Grado ${member.Grado}`));
+    cardHeader.appendChild(left);
+
+    const right = el("div", {style:{textAlign:"right",display:"flex",gap:"10px",alignItems:"center"}});
+    const scoreEl = el("div", {className:"subject-score"});
+    scoreEl.style.color = avg ? getScoreColor(avg) : "var(--faint)";
+    scoreEl.textContent = avg || "–";
+    right.appendChild(scoreEl);
+    const respEl = el("div", {style:{fontSize:"11px",color:"var(--faint)"}}, `${memberResponses.length}/${totalEvals} resp.`);
+    right.appendChild(respEl);
+    cardHeader.appendChild(right);
+    card.appendChild(cardHeader);
+
+    const progressWrap = el("div", {style:{display:"flex",alignItems:"center",gap:"8px",marginTop:"10px"}});
+    const pb = renderProgressBar(pct, pct === 1 ? "var(--green)" : "var(--indra)");
+    pb.style.flex = "1";
+    progressWrap.appendChild(pb);
+    progressWrap.appendChild(el("span", {style:{fontSize:"11px",color:"var(--faint)",whiteSpace:"nowrap"}}, `${Math.round(pct*100)}%`));
+    card.appendChild(progressWrap);
+
+    if (avg) {
+      const miniPills = el("div", {className:"driver-mini"});
+      DRIVER_ORDER.forEach(d => {
+        const da = calcDriverAvg(memberResponses, d);
+        if (da) {
+          const pill = el("span", {className:"driver-mini-pill"});
+          pill.style.background = getScoreBg(da);
+          pill.style.color = getScoreColor(da);
+          pill.textContent = `${DRIVER_ICONS[d]} ${da}`;
+          miniPills.appendChild(pill);
+        }
+      });
+      card.appendChild(miniPills);
+    }
+    cont.appendChild(card);
+  });
+
+  return cont;
+}
+
+// ═══ ADMIN REPORT ═══
+function renderAdminReport() {
+  const subject = state.reportSubject;
+  const cfg = DRIVERS_CONFIG[subject.Rol] || DRIVERS_CONFIG["Senior Consultant"];
+  const responses = state.responses.filter(r => r.EvaluadoID === subject.ID);
+  const avg = calcWeightedAvg(responses, subject.Rol);
+  const avgNum = avg ? parseFloat(avg) : 0;
+  const cont = el("div", {className:"container"});
+
+  const back = el("button", {className:"btn btn-secondary btn-sm", style:{marginBottom:"20px"}, onClick: async () => {
+    await loadResponses(); state.view = "adminDash"; render();
+  }}, "← Volver al panel");
+  cont.appendChild(back);
+
+  cont.appendChild(el("div", {className:"page-title"}, `Informe 360° — ${subject.Nombre}`));
+  cont.appendChild(el("div", {className:"page-sub"}, `${subject.Rol} · Grado ${subject.Grado} · ${responses.length} evaluaciones · ${CONFIG.periodo}`));
+
+  if (!responses.length) {
+    cont.appendChild(el("div", {className:"empty"}, "Sin respuestas aún para este evaluado."));
+    return cont;
+  }
+
+  // Overall score card
+  const overallCard = el("div", {className:"card", style:{marginBottom:"16px"}});
+  overallCard.style.background = avg ? getScoreBg(avg) : "var(--indra-light)";
+  overallCard.style.borderColor = avg ? getScoreColor(avg) + "40" : "rgba(0,61,165,0.2)";
+
+  const overallRow = el("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center"}});
+  const overallLeft = el("div");
+  overallLeft.appendChild(el("div", {className:"section-label"}, "Puntuación global ponderada"));
+  const overallScore = el("div", {style:{fontSize:"40px",fontWeight:"900"}});
+  overallScore.style.color = avg ? getScoreColor(avg) : "var(--indra)";
+  overallScore.textContent = avg || "–";
+  overallLeft.appendChild(overallScore);
+  if (avg) {
+    const scoreLbl = el("div", {style:{fontSize:"14px",fontWeight:"600"}});
+    scoreLbl.style.color = getScoreColor(avg);
+    scoreLbl.textContent = SCORE_META[Math.round(avgNum)]?.label || "";
+    overallLeft.appendChild(scoreLbl);
+  }
+  overallRow.appendChild(overallLeft);
+
+  const driverScores = {};
+  DRIVER_ORDER.forEach(d => { driverScores[d] = calcDriverAvg(responses, d); });
+  overallRow.appendChild(renderRadar(driverScores, subject.Rol));
+  overallCard.appendChild(overallRow);
+  cont.appendChild(overallCard);
+
+  // Drivers breakdown
+  const driversCard = el("div", {className:"card", style:{marginBottom:"16px"}});
+  driversCard.appendChild(el("div", {className:"section-label"}, "Detalle por driver"));
+  DRIVER_ORDER.forEach(d => {
+    const da = driverScores[d];
+    const daNum = da ? parseFloat(da) : 0;
+    const row = el("div", {className:"driver-report-row"});
+    row.appendChild(el("span", {className:"driver-report-icon"}, DRIVER_ICONS[d]));
+    const nameWrap = el("div", {style:{flex:"1"}});
+    nameWrap.appendChild(el("div", {className:"driver-report-name"}, DRIVER_NAMES[d]));
+    nameWrap.appendChild(el("div", {className:"driver-report-weight"}, `Peso ${(cfg.weights[d]*100).toFixed(0)}%`));
+    row.appendChild(nameWrap);
+    const barWrap = el("div", {className:"driver-bar-wrap"});
+    barWrap.appendChild(renderProgressBar(daNum/5, da ? getScoreColor(da) : undefined));
+    row.appendChild(barWrap);
+    const scoreEl = el("div", {className:"driver-score-val"});
+    scoreEl.style.color = da ? getScoreColor(da) : "var(--faint)";
+    scoreEl.textContent = da || "–";
+    row.appendChild(scoreEl);
+    driversCard.appendChild(row);
+  });
+  cont.appendChild(driversCard);
+
+  // Strengths & areas
+  const sorted = DRIVER_ORDER.map(d => ({d, avg: driverScores[d] ? parseFloat(driverScores[d]) : 0})).sort((a,b) => b.avg - a.avg);
+  const strengths = sorted.slice(0,2).filter(x => x.avg > 0);
+  const areas = sorted.slice(-2).filter(x => x.avg > 0 && x.avg < 4);
+
+  const twoCol = el("div", {className:"two-col"});
+  const sCard = el("div", {className:"card"});
+  sCard.appendChild(el("div", {className:"section-label"}, "Puntos fuertes"));
+  strengths.forEach(({d}) => {
+    const item = el("div", {className:"strength-item"});
+    item.appendChild(el("span", {className:"strength-plus"}, "+"));
+    item.appendChild(document.createTextNode(DRIVER_NAMES[d]));
+    sCard.appendChild(item);
+  });
+  const aCard = el("div", {className:"card"});
+  aCard.appendChild(el("div", {className:"section-label"}, "Áreas de desarrollo"));
+  if (!areas.length) {
+    aCard.appendChild(el("div", {style:{fontSize:"13px",color:"var(--muted)"}}, "Sin áreas de mejora destacadas."));
+  } else {
+    areas.forEach(({d}) => {
+      const item = el("div", {className:"strength-item"});
+      item.appendChild(el("span", {className:"area-arrow"}, "↑"));
+      item.appendChild(document.createTextNode(DRIVER_NAMES[d]));
+      aCard.appendChild(item);
+    });
+  }
+  twoCol.appendChild(sCard); twoCol.appendChild(aCard);
+  cont.appendChild(twoCol);
+
+  // Aggregated comments (anonymous)
+  const commCard = el("div", {className:"card", style:{marginBottom:"16px"}});
+  commCard.appendChild(el("div", {className:"section-label"}, "Tendencias de feedback (anonimizado)"));
+  DRIVER_ORDER.forEach(d => {
+    const map = { capacidad_analitica:"CapAnalit", excelencia_entrega:"ExcEntrega", trabajo_equipo:"TrabEquipo", gestion:"Gestion", interlocucion:"Interlocucion", conocimiento_tecnico:"ConocTecnico" };
+    const key = map[d];
+    const picks = {};
+    const freeComments = [];
+    responses.forEach(r => {
+      if (r[`Pick_${key}`]) picks[r[`Pick_${key}`]] = (picks[r[`Pick_${key}`]] || 0) + 1;
+      if (r[`Comment_${key}`]) freeComments.push(r[`Comment_${key}`]);
+    });
+    const topPick = Object.entries(picks).sort((a,b) => b[1]-a[1])[0];
+    if (!topPick && !freeComments.length) return;
+    const block = el("div", {className:"comment-block"});
+    block.appendChild(el("div", {className:"comment-block-title"}, `${DRIVER_ICONS[d]} ${DRIVER_NAMES[d]}`));
+    if (topPick) {
+      block.appendChild(el("div", {className:"comment-trend"}, `Tendencia del equipo: "${topPick[0]}" (${topPick[1]} menciones)`));
+    }
+    freeComments.forEach(c => {
+      block.appendChild(el("div", {className:"comment-free"}, c));
+    });
+    commCard.appendChild(block);
+  });
+  cont.appendChild(commCard);
+
+  // Admin-only section
+  const adminSection = el("div", {className:"admin-only"});
+  adminSection.appendChild(el("div", {className:"admin-only-title"}, "Solo visible para el administrador — Detalle por evaluador"));
+  responses.forEach(r => {
+    const evaluator = state.evaluators.find(e => e.ID === r.EvaluadorID);
+    const rRow = el("div", {className:"response-row"});
+    const evalName = el("div", {className:"response-evaluator"});
+    evalName.textContent = evaluator?.Nombre || r.EvaluadorNombre || `Evaluador ${r.EvaluadorID}`;
+    const dateEl = el("span", {className:"response-date"});
+    dateEl.textContent = r.FechaEnvio ? new Date(r.FechaEnvio).toLocaleString("es-ES") : "";
+    evalName.appendChild(dateEl);
+    rRow.appendChild(evalName);
+    DRIVER_ORDER.forEach(d => {
+      const map = { capacidad_analitica:"CapAnalit", excelencia_entrega:"ExcEntrega", trabajo_equipo:"TrabEquipo", gestion:"Gestion", interlocucion:"Interlocucion", conocimiento_tecnico:"ConocTecnico" };
+      const key = map[d];
+      const score = r[`Score_${key}`];
+      if (!score) return;
+      const dRow = el("div", {className:"response-driver"});
+      const scoreSpan = el("span", {style:{fontWeight:"700"}});
+      scoreSpan.style.color = getScoreColor(score.toString());
+      scoreSpan.textContent = score;
+      dRow.appendChild(document.createTextNode(`${DRIVER_NAMES[d]}: `));
+      dRow.appendChild(scoreSpan);
+      const pick = r[`Pick_${key}`];
+      const comment = r[`Comment_${key}`];
+      if (pick || comment) {
+        dRow.appendChild(document.createTextNode(` — ${pick || ""}${pick && comment ? ". " : ""}${comment || ""}`));
+      }
+      rRow.appendChild(dRow);
+    });
+    adminSection.appendChild(rRow);
+  });
+  cont.appendChild(adminSection);
+  return cont;
+}
+
+// ═══ ADMIN CONFIG ═══
+function renderAdminConfig() {
+  const cont = el("div", {className:"container"});
+  cont.appendChild(el("div", {className:"page-title"}, "Gestión del equipo y evaluadores"));
+
+  // Team section
+  const teamHeader = el("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px",marginTop:"20px"}});
+  teamHeader.appendChild(el("div", {className:"section-label", style:{margin:"0"}}, "Equipo evaluado"));
+  teamHeader.appendChild(el("button", {className:"btn btn-primary btn-sm", onClick: () => {
+    state.editingTeamItem = {isNew: true, Nombre:"", Rol:"Consultant", Grado:"I", Activo: true};
+    render();
+  }}, "+ Añadir"));
+  cont.appendChild(teamHeader);
+
+  if (state.editingTeamItem) {
+    const f = state.editingTeamItem;
+    const formCard = el("div", {className:"card card-blue", style:{marginBottom:"12px"}});
+    formCard.appendChild(el("div", {className:"section-label"}, f.isNew ? "Nuevo miembro" : "Editar miembro"));
+    const row1 = el("div", {className:"form-row"});
+    const nameInput = el("input", {type:"text", placeholder:"Nombre completo"});
+    nameInput.value = f.Nombre || "";
+    nameInput.addEventListener("input", e => state.editingTeamItem.Nombre = e.target.value);
+    const rolSel = el("select");
+    ["Analyst","Consultant","Senior Consultant","Project Manager","Manager","Senior Manager"].forEach(r => {
+      const o = el("option", {value:r}, r);
+      if (f.Rol === r) o.selected = true;
+      rolSel.appendChild(o);
+    });
+    rolSel.addEventListener("change", e => state.editingTeamItem.Rol = e.target.value);
+    row1.appendChild(el("div", {className:"form-group"}, nameInput));
+    row1.appendChild(el("div", {className:"form-group"}, rolSel));
+    formCard.appendChild(row1);
+
+    const row2 = el("div", {className:"form-row"});
+    const gradSel = el("select");
+    ["I","II","III","IV","V","VI"].forEach(g => {
+      const o = el("option", {value:g}, g);
+      if (f.Grado === g) o.selected = true;
+      gradSel.appendChild(o);
+    });
+    gradSel.addEventListener("change", e => state.editingTeamItem.Grado = e.target.value);
+    const checkRow = el("div", {className:"checkbox-row"});
+    const chk = el("input", {type:"checkbox"});
+    chk.checked = f.Activo !== false;
+    chk.addEventListener("change", e => state.editingTeamItem.Activo = e.target.checked);
+    checkRow.appendChild(chk);
+    checkRow.appendChild(document.createTextNode("Activo en la campaña"));
+    row2.appendChild(el("div", {className:"form-group"}, gradSel));
+    row2.appendChild(el("div", {className:"form-group"}, checkRow));
+    formCard.appendChild(row2);
+
+    const btnRow = el("div", {style:{display:"flex",gap:"8px"}});
+    btnRow.appendChild(el("button", {className:"btn btn-primary btn-sm", onClick: async () => {
+      const item = { Nombre: f.Nombre, Rol: f.Rol, Grado: f.Grado, Activo: f.Activo !== false };
+      if (f.isNew) await createListItem(CONFIG.lists.equipo, item);
+      else await updateListItem(CONFIG.lists.equipo, f.ID, item);
+      await loadTeam(); state.editingTeamItem = null; render();
+    }}, "Guardar"));
+    btnRow.appendChild(el("button", {className:"btn btn-secondary btn-sm", onClick: () => { state.editingTeamItem = null; render(); }}, "Cancelar"));
+    formCard.appendChild(btnRow);
+    cont.appendChild(formCard);
+  }
+
+  state.team.forEach(m => {
+    const item = el("div", {style:{display:"flex",alignItems:"center",gap:"10px",padding:"12px 16px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",marginBottom:"6px"}});
+    const info = el("div", {style:{flex:"1"}});
+    info.appendChild(el("div", {style:{fontWeight:"700",fontSize:"14px",color:"var(--text)"}}, m.Nombre));
+    info.appendChild(el("div", {style:{fontSize:"12px",color:"var(--faint)"}}, `${m.Rol} · Grado ${m.Grado}`));
+    item.appendChild(info);
+    const activePill = el("span", {className:"pill"});
+    activePill.style.background = m.Activo ? "var(--green-bg)" : "#F1F5F9";
+    activePill.style.color = m.Activo ? "var(--green)" : "var(--faint)";
+    activePill.textContent = m.Activo ? "Activo" : "Inactivo";
+    item.appendChild(activePill);
+    item.appendChild(el("button", {className:"btn btn-secondary btn-sm", onClick: () => {
+      state.editingTeamItem = {...m}; render();
+    }}, "Editar"));
+    item.appendChild(el("button", {className:"btn btn-danger btn-sm", onClick: async () => {
+      if (confirm(`¿Eliminar a ${m.Nombre}?`)) {
+        await deleteListItem(CONFIG.lists.equipo, m.ID);
+        await loadTeam(); render();
+      }
+    }}, "Eliminar"));
+    cont.appendChild(item);
+  });
+
+  // Evaluators section
+  const evalHeader = el("div", {style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px",marginTop:"28px"}});
+  evalHeader.appendChild(el("div", {className:"section-label", style:{margin:"0"}}, "Evaluadores"));
+  evalHeader.appendChild(el("button", {className:"btn btn-primary btn-sm", onClick: () => {
+    state.editingEvalItem = {isNew: true, Nombre:"", Email:"", Activo: true};
+    render();
+  }}, "+ Añadir"));
+  cont.appendChild(evalHeader);
+
+  if (state.editingEvalItem) {
+    const f = state.editingEvalItem;
+    const formCard = el("div", {className:"card card-blue", style:{marginBottom:"12px"}});
+    formCard.appendChild(el("div", {className:"section-label"}, f.isNew ? "Nuevo evaluador" : "Editar evaluador"));
+    const nameInput = el("input", {type:"text", placeholder:"Nombre completo"});
+    nameInput.value = f.Nombre || "";
+    nameInput.addEventListener("input", e => state.editingEvalItem.Nombre = e.target.value);
+    const emailInput = el("input", {type:"text", placeholder:"email@minsait.com"});
+    emailInput.value = f.Email || "";
+    emailInput.addEventListener("input", e => state.editingEvalItem.Email = e.target.value);
+    const checkRow = el("div", {className:"checkbox-row", style:{marginTop:"8px"}});
+    const chk = el("input", {type:"checkbox"});
+    chk.checked = f.Activo !== false;
+    chk.addEventListener("change", e => state.editingEvalItem.Activo = e.target.checked);
+    checkRow.appendChild(chk);
+    checkRow.appendChild(document.createTextNode("Activo en la campaña"));
+
+    formCard.appendChild(el("div", {className:"form-group"}, nameInput));
+    formCard.appendChild(el("div", {className:"form-group"}, emailInput));
+    formCard.appendChild(checkRow);
+
+    const btnRow = el("div", {style:{display:"flex",gap:"8px",marginTop:"12px"}});
+    btnRow.appendChild(el("button", {className:"btn btn-primary btn-sm", onClick: async () => {
+      const item = { Nombre: f.Nombre, Email: f.Email, Activo: f.Activo !== false };
+      if (f.isNew) await createListItem(CONFIG.lists.evaluadores, item);
+      else await updateListItem(CONFIG.lists.evaluadores, f.ID, item);
+      await loadEvaluators(); state.editingEvalItem = null; render();
+    }}, "Guardar"));
+    btnRow.appendChild(el("button", {className:"btn btn-secondary btn-sm", onClick: () => { state.editingEvalItem = null; render(); }}, "Cancelar"));
+    formCard.appendChild(btnRow);
+    cont.appendChild(formCard);
+  }
+
+  state.evaluators.forEach(e => {
+    const item = el("div", {style:{display:"flex",alignItems:"center",gap:"10px",padding:"12px 16px",background:"var(--surface)",border:"1px solid var(--border)",borderRadius:"10px",marginBottom:"6px"}});
+    const info = el("div", {style:{flex:"1"}});
+    info.appendChild(el("div", {style:{fontWeight:"700",fontSize:"14px",color:"var(--text)"}}, e.Nombre));
+    info.appendChild(el("div", {style:{fontSize:"12px",color:"var(--faint)"}}, e.Email || ""));
+    item.appendChild(info);
+    item.appendChild(el("button", {className:"btn btn-secondary btn-sm", onClick: () => {
+      state.editingEvalItem = {...e}; render();
+    }}, "Editar"));
+    item.appendChild(el("button", {className:"btn btn-danger btn-sm", onClick: async () => {
+      if (confirm(`¿Eliminar a ${e.Nombre}?`)) {
+        await deleteListItem(CONFIG.lists.evaluadores, e.ID);
+        await loadEvaluators(); render();
+      }
+    }}, "Eliminar"));
+    cont.appendChild(item);
+  });
+
+  return cont;
+}
+
+// ═══════════════════════════════════════════════════════
+// MAIN RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+
+  if (state.loading) {
+    const loadingEl = el("div", {className:"loading"}, "⟳ Conectando con SharePoint...");
+    app.appendChild(loadingEl);
+    return;
+  }
+
+  const topbar = renderTopbar();
+  if (topbar) app.appendChild(topbar);
+
+  // Admin tabs
+  if (state.isAdmin && state.view !== "adminReport" && ["adminDash","adminConfig"].includes(state.view)) {
+    const tabs = el("div", {className:"tabs"});
+    [
+      {id:"adminDash", label:"📊 Resultados"},
+      {id:"adminConfig", label:"👥 Equipo y Evaluadores"}
+    ].forEach(tab => {
+      const btn = el("button", {className:"tab-btn" + (state.view === tab.id ? " active" : ""), onClick: async () => {
+        state.view = tab.id;
+        if (tab.id === "adminDash") await loadResponses();
+        if (tab.id === "adminConfig") { await loadTeam(); await loadEvaluators(); }
+        render();
+      }}, tab.label);
+      tabs.appendChild(btn);
+    });
+    app.appendChild(tabs);
+  }
+
+  let content;
+  switch(state.view) {
+    case "login": content = renderLogin(); break;
+    case "evalList": content = renderEvalList(); break;
+    case "evalForm": content = renderEvalForm(); break;
+    case "done": content = renderDone(); break;
+    case "adminDash": content = renderAdminDash(); break;
+    case "adminReport": content = renderAdminReport(); break;
+    case "adminConfig": content = renderAdminConfig(); break;
+    default: content = renderLogin();
+  }
+
+  if (content) app.appendChild(content);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+render();
+</script>
+</body>
+</html>
